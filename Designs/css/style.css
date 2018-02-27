@@ -1,0 +1,75 @@
+body {
+    height: 100%;
+ 
+}
+.bg { 
+    /* The image used */
+    background-image: url("../images/pexels.jpeg");
+
+    /* Full height */
+    height: 100%; 
+
+    /* Center and scale the image nicely */
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+}                    
+
+.navbar a{
+	color: white;
+}
+.navbar-nav li a:hover {
+	background: orange;
+}
+header{
+	height: 450px;
+	padding: 50px;
+	color: black;
+}
+header h1{
+	font-size: 50px;
+}
+.navbar-custom{
+	position: absolute;#
+	top: 0;
+	width: 100%;
+}
+.navbar-header a{
+size:25px;
+}
+#posts{
+border-bottom: 1px solid gray;
+}
+#posts h1{
+font-weight: bold;
+text-decoration: none;
+}
+#posts h1 a{
+color: black;
+}
+#posts h1 a:hover{
+color: red;
+}
+.down-btn{
+padding: 50px 0;
+}
+.btn{
+border-radius: 0;
+}
+.btn-default{
+
+}
+.btn-default:hover{
+background: #337AB7;
+border: 0;
+color: white;
+}
+.nav-center{
+	float: none;
+	display: table;
+	table-layout: fixed;
+	margin: 0 auto;
+}
+.nav-center li:hover{
+	background: white;
+}
