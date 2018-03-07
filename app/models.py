@@ -60,13 +60,14 @@ class Business (object):
         self.reviews = []
 
     @staticmethod
-    def delete_business(business_id):
-        for business in Business.businesses:
+    def delete_business(business_id, businesses):
+        for business in businesses:
             if business.id == business_id:
-                Business.businesses.remove (business)
+                businesses.remove(business)
 
-    def review_business(self):
-        pass
+    def review_business(self, review):
+        self.reviews.append(review)
+        return self.reviews
 
 
 class Review (object):

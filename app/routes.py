@@ -1,10 +1,10 @@
-from flask import url_for, request, jsonify, Blueprint
+from flask import request, jsonify, Blueprint
 from app.models import User, Business, Review
 
 # from app import app
 
 
-bp = Blueprint ('app', __name__, url_prefix='/api/v1/')
+bp = Blueprint('app', __name__, url_prefix='/api/v1/')
 users = []
 
 
