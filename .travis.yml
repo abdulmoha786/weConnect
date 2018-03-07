@@ -1,15 +1,15 @@
 language: python
-python:
+python: 
   - "3.6"
 
 #Install Dependencies
-install:
+install: 
   - pip install -r requirements.txt
 
-script:
+script: 
   - nosetests --exe -v 
   - nosetests --exe --with-coverage --cover-package=app 
   - coveralls 
-  
+
 after_success:
   - "coveralls"
