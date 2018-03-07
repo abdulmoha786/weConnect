@@ -5,12 +5,11 @@ python:
 #Install Dependencies
 install:
   - pip install -r requirements.txt
-  
+
 script:
-  -nosetests --exe -v
-  -nosetests --exe --with-coverage --cover-package=app
-  -coveralls
+  - nosetests --exe -v 
+  - nosetests --exe --with-coverage --cover-package=app 
+  - coveralls 
   
 after_success:
-  -"coveralls"
- 
+  - "coveralls"
