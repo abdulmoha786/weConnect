@@ -1,8 +1,10 @@
 # from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+
+
 # from app import login
-from flask_bcrypt import Bcrypt
+# from flask_bcrypt import Bcrypt
 
 
 # @login.user_loader
@@ -12,16 +14,8 @@ from flask_bcrypt import Bcrypt
 
 # return User.query.get(int(id))
 
-
 class User (object):
     users = []
-
-    def __init__(self):
-        self.user_id = ""
-        self.username = ""
-        self.email = ""
-        self.password_hash = ""
-        self.login = False
 
     def __init__(self, user_id, username, email, password):
         self.user_id = user_id
@@ -30,40 +24,29 @@ class User (object):
         self.password_hash = generate_password_hash(password)
         self.login = False
 
+    def __eq__(self, other):
+        return self.email == other.email
+
     def set_password(self, password):
         pass
 
-    def create_user(self, user_id, username, email, password):
-        self.username = username
-        self.email = email
-        self.user_id = user_id
-        self.password_hash = generate_password_hash (password)
+    @staticmethod
+    def add_user(user):
+        User.users.append (user)
 
-        user = {'user_id': user_id,
-                'username': username,
-                'email': email,
-                'password_hash': self.password_hash
-                }
-
-        if user in User.users:
-            message = {'user': user['username'],
-                       'message': "User Exists"}
-            return message
-        else:
-            User.users.append (user)
-            message = {'user': user['username'],
-                       'message': "User created successfully"}
-            return message
+    # def __iter__(self):
+    #     self.__index = -1
+    #     return self
+    #
+    # def __next__(self):
+    #     if self.__index >= len(users)-1:
+    #         raise StopIteration
+    #     self.__index += 1
+    #     user = User.users[self.__index]
+    #     return user
 
     def check_password(self, password):
-        return check_password_hash (self.password_hash, password)
-
-    def __repr__(self):
-        return {'user_id': self.user_id,
-                'username': self.username,
-                'email': self.email,
-                'password_hash': self.password_hash
-                }
+        return check_password_hash(self.password_hash, password)
 
 
 class Business (object):
