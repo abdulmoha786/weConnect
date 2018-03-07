@@ -1,17 +1,26 @@
 import unittest
+from flask import current_app, jsonify
 import json
 from app import app
-from app.models import User,Business,Review
+from app.models import User, Business, Review
+from config import TestingConfig
 
-class WeconnectTestCase(unittest.TestCase):
+
+class WeconnectTestCase (unittest.TestCase):
     """This class represents the weconnect Testcase"""
-
 
     def setUp(self):
         """Define variables and initialize app."""
-        self.app = app
-        self.client = self.app.test_client
-        self.weconnect = {'name':'weconnect app'}
+        # testapp = app
+        # app.config.from_object(TestingConfig)
+        self.client = app.test_client ()
+        self.client.testing = True
+        # self.user_id = 1
+        # self.username = "Abdulaziz"
+        # self.email = "myemail.com"
+        # self.password = "mypassword"
+        self.user = User (1, "Abdulaziz", "myemail.com", "mypassword")
+        # self.business = Business()
 
     def test_app_creation(self):
         """"""
@@ -19,15 +28,35 @@ class WeconnectTestCase(unittest.TestCase):
 
     def test_create_user(self):
         """"""
-        pass
+        user_data = {'user_id': self.user.user_id,
+                     'username': self.user.username,
+                     'email': self.user.email,
+                     'password': self.user.password_hash}
+
+        res = self.client.post('/api/v1/auth/register', data=json.dumps(user_data),
+                               headers={'content-type': 'application/json'})
+        self.assertEqual(res.status_code, 200)
+        self.assertIn(self.user.username, str(res.data))
 
     def test_login(self):
         """"""
-        pass
+        login_data = {
+                      'username': "Abdulaziz",
+                      'password': "mypassword"
+                     }
+        res = self.client.post('/api/v1/auth/login', data=json.dumps(login_data),
+                               headers={'content-type': 'application/json'})
+        self.assertEqual(res.status_code, 200)
+        self.assertIn(self.user.username, str(res.data))
 
-    def test_login(self):
+    def test_logout(self):
         """"""
-        pass
+        data = {
+                'email':"myemail.com"
+               }
+        res = self.client.post('/api/v1/auth/logout', data=json.dumps(data),
+                               headers={'content-type': 'application/json'})
+        self.assertEqual(res.status_code, 200)
 
     def test_reset_password(self):
         """"""
@@ -60,4 +89,7 @@ class WeconnectTestCase(unittest.TestCase):
     def test_get_reviews(self):
         """"""
         pass
-    
+
+
+if __name__ == "__main__":
+    unittest.main ()
