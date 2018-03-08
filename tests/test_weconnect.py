@@ -26,6 +26,13 @@ class WeconnectTestCase (unittest.TestCase):
         """"""
         pass
 
+    def test_user_generates_auth_token(self):
+        users = [self.user]
+        self.user.__list = users
+        token = self.user.generate_auth_token()
+        user2 = User.verify_auth_token(token, users)
+        self.assertEqual(user2, self.user)
+
     def test_create_user(self):
         """"""
         user_data = {'user_id': self.user.user_id,
@@ -35,6 +42,8 @@ class WeconnectTestCase (unittest.TestCase):
 
         res = self.client.post('/api/v1/auth/register', data=json.dumps(user_data),
                                headers={'content-type': 'application/json'})
+        # user = User()
+        # self.users.append()
         self.assertEqual(res.status_code, 200)
         self.assertIn(self.user.username, str(res.data))
 
@@ -64,6 +73,9 @@ class WeconnectTestCase (unittest.TestCase):
 
     def test_register_business(self):
         """"""
+        # data = {
+        #
+        #         }
         pass
 
     def test_update_business_profile(self):
