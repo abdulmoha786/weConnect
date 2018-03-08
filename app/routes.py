@@ -97,7 +97,7 @@ def register_business():
     owner_email = data['owner_email']
     owner = User.get_user_by_email(owner_email, User.user_list)
     if owner is not None:
-        business = Business(data['business_id'], data['owner_email'], data['name'], data['profile'])
+        business = Business(data['business_id'], data['owner_email'], data['name'], data['location'], data['profile'])
         businesses.append(business)
         message = {
                     'business': data['business_id'],
@@ -133,6 +133,7 @@ def retrieve_businesses():
         business_data = {
             'id':business.id,
             'name':business.name,
+            'locstion': business.location,
             'profile':business.profile
         }
         data[business_no]=business_data

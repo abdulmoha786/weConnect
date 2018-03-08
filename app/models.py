@@ -66,7 +66,7 @@ class User (object):
 class Business (object):
     businesses = []
 
-    def __init__(self, business_id, owner, name, profile):
+    def __init__(self, business_id, owner, name, location, profile):
         self.id = business_id
         self.name = name
         self.location = location

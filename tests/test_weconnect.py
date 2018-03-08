@@ -17,7 +17,7 @@ class WeconnectTestCase (unittest.TestCase):
         self.client.testing = True
         self.user = User (1, "Abdulaziz", "myemail.com", "mypassword")
         self.user2 = User(2, "Rajab", "rajab.com", "hispassword")
-        self.business = Business(1,self.user.email, "my business", "my business is good")
+        self.business = Business(1,self.user.email, "my business", "Roysambu", "my business is good")
         self.review = Review(1,1,"Your bisness is great", self.user2.email)
 
     def test_app_creation(self):
@@ -75,6 +75,7 @@ class WeconnectTestCase (unittest.TestCase):
                 'business_id':self.business.id,
                 'owner_email': self.user.email,
                 'name': self.business.name,
+                'location':self.business.location,
                 'profile':self.business.profile
                 }
         res = self.client.post('/api/v1/businesses', data=json.dumps(data),
