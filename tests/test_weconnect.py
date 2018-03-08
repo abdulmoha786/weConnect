@@ -100,12 +100,7 @@ class WeconnectTestCase (unittest.TestCase):
 
     def test_add_review(self):
         """"""
-        # data = {
-        #         'review_id':self.review.review_id,
-        #         'review_text':self.review.review_text,
-        #         'business_id':self.review.business_id,
-        #         'user_id':self.review.user_id
-        #         }
+
 
 
     def test_get_reviews(self):
