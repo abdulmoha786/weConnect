@@ -73,9 +73,15 @@ class WeconnectTestCase (unittest.TestCase):
 
     def test_register_business(self):
         """"""
-        # data = {
-        #
-        #         }
+        data = {
+                'business_id':1,
+                'owner_id': 1,
+                'name':'my business',
+                'profile':'my business is good'
+                }
+        res = self.client.post ('/api/v1/businesses', data=json.dumps (data),
+                                headers={'content-type': 'application/json'})
+        self.assertEqual (res.status_code, 200)
         pass
 
     def test_update_business_profile(self):
