@@ -1,6 +1,7 @@
-# from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
+from config import Config
+from itsdangerous import (TimedJSONWebSignatureSerializer
+                          as Serializer, BadSignature, SignatureExpired)
 
 
 # from app import login
@@ -12,17 +13,30 @@ from flask_login import UserMixin
 #     pass
 
 
-# return User.query.get(int(id))
-
 class User (object):
-    users = []
-
     def __init__(self, user_id, username, email, password):
         self.user_id = user_id
         self.username = username
         self.email = email
-        self.password_hash = generate_password_hash(password)
+        self.password_hash = generate_password_hash (password)
         self.login = False
+        self.__list = []
+
+    def generate_auth_token(self, expiration=600):
+        s = Serializer (Config.SECRET_KEY, expires_in=expiration)
+        return s.dumps ({'email': self.email})
+
+    @staticmethod
+    def verify_auth_token(token, users):
+        s = Serializer (Config.SECRET_KEY)
+        try:
+            data = s.loads (token)
+        except SignatureExpired:
+            return None
+        except BadSignature:
+            return None
+        user = User.get_user_by_email (data['email'], users)
+        return user
 
     def __eq__(self, other):
         return self.email == other.email
@@ -31,22 +45,25 @@ class User (object):
         pass
 
     @staticmethod
-    def add_user(user):
-        User.users.append (user)
+    def get_user_by_email(email, users):
+        for user in users:
+            if user.email == email:
+                return user
+        return None
 
-    # def __iter__(self):
-    #     self.__index = -1
-    #     return self
-    #
-    # def __next__(self):
-    #     if self.__index >= len(users)-1:
-    #         raise StopIteration
-    #     self.__index += 1
-    #     user = User.users[self.__index]
-    #     return user
+    def __iter__(self):
+        self.__index = -1
+        return self
+
+    def __next__(self):
+        if self.__index >= len (self.__list) - 1:
+            raise StopIteration
+        self.__index += 1
+        user = User.users[self.__index]
+        return user
 
     def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
+        return check_password_hash (self.password_hash, password)
 
 
 class Business (object):
@@ -65,20 +82,31 @@ class Business (object):
             if business.id == business_id:
                 Business.businesses.remove (business)
 
-    def review_business(self):
-        pass
+    def review_business(self, review):
+        self.reviews.append(review)
+
+    def delete_review(self, review_id, owner):
+        review = Review.get_review(review_id, self.reviews)
+        if review is not None and review.user_id == owner:
+            self.reviews.remove(review)
 
 
 class Review (object):
-    reviews = []
-
-    def __init__(self, review_id, business_id, review_text):
+    def __init__(self, review_id, business_id, review_text, user_id):
         self.review_id = review_id
         self.review_text = review_text
         self.business_id = business_id
+        self.user_id = user_id
 
     def delete_review(self):
         pass
 
-    def get_review(self, review_id):
-        pass
+    @staticmethod
+    def get_review(review_id, reviews):
+        for review in reviews:
+            if review.review_id == review_id:
+                return review
+        return None
+
+    def update_review(self, review_text):
+        self.review_text = review_text
