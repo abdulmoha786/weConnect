@@ -5,10 +5,10 @@ from flask_httpauth import HTTPBasicAuth
 # from app import app
 
 
-bp = Blueprint ('app', __name__, url_prefix='/api/v1/')
+bp = Blueprint('app', __name__, url_prefix='/api/v1/')
 auth = HTTPBasicAuth()
 users = []
-business = []
+businesses = []
 review = []
 
 @bp.route('auth/')
@@ -29,7 +29,7 @@ def verify_password(username_or_token, password):
     return True
 
 
-@bp.route ('auth/register', methods=['POST'])
+@bp.route('auth/register', methods=['POST'])
 def create_user():
     data = request.get_json ()
     username = data['username']
@@ -91,10 +91,28 @@ def reset_password(old_password, new_password):
     pass
 
 
-@bp.route ('/api/businesses', methods=['POST'])
+@bp.route('businesses', methods=['POST'])
 def register_business():
     data = request.get_json()
-
+    owner_email = data['owner_email']
+    owner = User.get_user_by_email(owner_email, users)
+    if owner is not None:
+        business = Business(data['business_id'], data['owner_email'], data['name'], data['profile'])
+        businesses.append(business)
+        message = {
+                    'business':data['business_id'],
+                    'status':'registered successfully'
+                  }
+        response = jsonify(message)
+        response.status_code = 201
+        return response
+    message = {
+        'business': data['business_id'],
+        'status': 'User Unknown'
+    }
+    response = jsonify(message)
+    response.status_code = 500
+    return response
 
 
 @bp.route ('/api/businesses/<businessId>', methods=['PUT'])

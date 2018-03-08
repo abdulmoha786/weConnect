@@ -15,12 +15,8 @@ class WeconnectTestCase (unittest.TestCase):
         # app.config.from_object(TestingConfig)
         self.client = app.test_client ()
         self.client.testing = True
-        # self.user_id = 1
-        # self.username = "Abdulaziz"
-        # self.email = "myemail.com"
-        # self.password = "mypassword"
         self.user = User (1, "Abdulaziz", "myemail.com", "mypassword")
-        # self.business = Business()
+        self.business = Business(1,self.user.email, "my business", "my business is good")
 
     def test_app_creation(self):
         """"""
@@ -74,14 +70,14 @@ class WeconnectTestCase (unittest.TestCase):
     def test_register_business(self):
         """"""
         data = {
-                'business_id':1,
-                'owner_id': 1,
-                'name':'my business',
-                'profile':'my business is good'
+                'business_id':self.business.id,
+                'owner_email': self.user.email,
+                'name': self.business.name,
+                'profile':self.business.profile
                 }
-        res = self.client.post ('/api/v1/businesses', data=json.dumps (data),
+        res = self.client.post('/api/v1/businesses', data=json.dumps(data),
                                 headers={'content-type': 'application/json'})
-        self.assertEqual (res.status_code, 200)
+        self.assertEqual (res.status_code, 201)
         pass
 
     def test_update_business_profile(self):

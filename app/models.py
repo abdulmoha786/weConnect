@@ -49,7 +49,8 @@ class User (object):
         for user in users:
             if user.email == email:
                 return user
-        return None
+            else:
+                return None
 
     def __iter__(self):
         self.__index = -1
