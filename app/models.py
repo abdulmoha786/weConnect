@@ -18,6 +18,10 @@ class User (object):
         s = Serializer(Config.SECRET_KEY, expires_in=expiration)
         return s.dumps({'email': self.email})
 
+    def reset_password(self, new_password):
+        new_password_hash = generate_password_hash(new_password)
+        self.password_hash = new_password_hash
+
     @staticmethod
     def verify_auth_token(token, users):
         s = Serializer(Config.SECRET_KEY)

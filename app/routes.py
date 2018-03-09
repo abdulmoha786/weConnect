@@ -2,14 +2,9 @@ from flask import request, jsonify, Blueprint, g
 from app.models import User, Business, Review
 from flask_httpauth import HTTPBasicAuth
 
-# from app import app
-
 
 bp = Blueprint('app', __name__, url_prefix='/api/v1/')
 auth = HTTPBasicAuth()
-users = []
-businesses = []
-review = []
 
 @bp.route('auth/')
 @auth.login_required
@@ -86,9 +81,20 @@ def logout():
     return jsonify(message)
 
 
-@bp.route('/api/auth/reset-password', methods=['POST'])
-def reset_password(old_password, new_password):
-    pass
+@bp.route('auth/reset-password', methods=['POST'])
+def reset_password():
+    data = request.get_json()
+    user = User.get_user_by_email(data['email'])
+    if user is not None and data['new_password']==data['new_password_confirm']:
+        user.reset_password(data['new_password'])
+        response = jsonify({
+                            'user':user.__repr__(),
+                            'message':'Password successfully reset'
+                           })
+        response.status_code = 200
+    response = jsonify({'message': 'User Invalid'})
+    response.status_code = 300
+    return response
 
 
 @bp.route('businesses', methods=['POST'])
@@ -115,17 +121,44 @@ def register_business():
     return response
 
 
-@bp.route('/api/businesses/<businessId>', methods=['PUT'])
-def update_business_profile():
-    pass
+@bp.route('businesses/<businessId>', methods=['PUT'])
+def update_business_profile(businessId, **kwargs):
+    business = Business.get_business(businessId)
+    data = request.get_json()
+    if business is not None:
+        business.profile = data['new_profile']
+        response = jsonify({
+                            'business':business.__repr__(),
+                            'status':'Profile Updated Successfully'
+                            })
+        response.status_code = 201
+        return response
+    response = jsonify({
+                        'message':'Business does not exist'
+                      })
+    response.status_code = 300
+    return response
 
 
-@bp.route ('/api/businesses/<businessId>', methods=['DELETE'])
-def delete_business():
-    pass
+@bp.route ('businesses/<int:businessId>', methods=['DELETE'])
+def delete_business(businessId, **kwargs):
+    business = Business.get_business(businessId)
+    if business is not None:
+        Business.businesses.remove(business)
+        response = jsonify({
+                            'business':business.__repr__(),
+                            'status':'Successfully deleted'
+                            })
+        response.status_code = 200
+        return response
+    response = jsonify({
+                        'status': 'Business does not exist'
+                        })
+    response.status_code = 300
+    return response
 
 
-@bp.route ('all/businesses', methods=['GET'])
+@bp.route('all/businesses', methods=['GET'])
 def retrieve_businesses():
     data = {}
     business_no = 1
@@ -184,6 +217,9 @@ def get_reviews(businessId, **kwargs):
         response = jsonify(data)
         response.status_code = 200
         return response
-    response = {
+    res = {
                 'message':'No such business or review'
                 }
+    response = jsonify(res)
+    response.status_code = 300
+    return response
