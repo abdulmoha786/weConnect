@@ -98,7 +98,7 @@ def register_business():
     owner = User.get_user_by_email(owner_email, User.user_list)
     if owner is not None:
         business = Business(data['business_id'], data['owner_email'], data['name'], data['location'], data['profile'])
-        businesses.append(business)
+        Business.businesses.append(business)
         message = {
                     'business': data['business_id'],
                     'status':'registered successfully'
@@ -129,30 +129,61 @@ def delete_business():
 def retrieve_businesses():
     data = {}
     business_no = 1
-    for business in businesses:
-        business_data = {
-            'id':business.id,
-            'name':business.name,
-            'locstion': business.location,
-            'profile':business.profile
-        }
-        data[business_no]=business_data
+    for business in Business.businesses:
+        data[business_no]=business.__repr__()
         business_no += 1
     response = jsonify(data)
     response.status_code = 200
     return response
 
 
-@bp.route('/api/businesses/<businessId>', methods=['GET'])
-def get_a_business():
-    pass
+@bp.route('businesses/<int:business_id>', methods=['GET'])
+def get_a_business(business_id, **kwargs):
+    business = Business.get_business(business_id)
+    if business is not None:
+        response = jsonify(business.__repr__())
+        response.status_code = 201
+        return response
+    message = {'status':'Object not found'}
+    response = jsonify(message)
+    response.status_code = 400
+    return response
 
 
-@bp.route('/api/businesses/<businessId>/reviews', methods=['POST'])
-def add_review():
-    pass
+@bp.route('businesses/<int:businessId>/reviews', methods=['POST'])
+def add_review(businessId, **kwargs):
+    data = request.get_json()
+    review = Review(data['review_id'], businessId, data['user_id'], data['review_text'])
+    business = Business.get_business(businessId)
+    user = User.get_user(data['user_id'])
+    if business and user is not None:
+        business.reviews.append(review)
+        Review.reviews.append(review)
+        response = jsonify({'review':review.__repr__(),
+                            'status':'added successfuly'
+                            })
+        response.status_code = 201
+        return response
+    response = jsonify({
+                        'review':review.__repr__(),
+                        'status':'review cannot be added, User or bsiness invalid'
+                        })
+    response.status_code = 300
+    return response
 
 
-@bp.route('/api/businesses/<businessId>/reviews', methods=['GET'])
-def get_reviews():
-    pass
+@bp.route('businesses/<int:businessId>/all/reviews', methods=['GET'])
+def get_reviews(businessId, **kwargs):
+    business = Business.get_business(businessId)
+    data = {}
+    review_no = 1
+    if business is not None:
+        for review in business.reviews:
+            data[review_no] = review.__repr__()
+            review_no += 1
+        response = jsonify(data)
+        response.status_code = 200
+        return response
+    response = {
+                'message':'No such business or review'
+                }

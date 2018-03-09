@@ -102,8 +102,6 @@ class WeconnectTestCase (unittest.TestCase):
     def test_add_review(self):
         """"""
 
-
-
     def test_get_reviews(self):
         """"""
         pass
