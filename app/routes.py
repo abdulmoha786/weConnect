@@ -1,4 +1,6 @@
 from flask import request, jsonify, Blueprint, g
+from werkzeug.exceptions import abort
+
 from app.models import User, Business, Review
 from flask_httpauth import HTTPBasicAuth
 
@@ -84,7 +86,7 @@ def logout():
 @bp.route('auth/reset-password', methods=['POST'])
 def reset_password():
     data = request.get_json()
-    user = User.get_user_by_email(data['email'])
+    user = User.get_user_by_email(data['email'], User.user_list)
     if user is not None and data['new_password']==data['new_password_confirm']:
         user.reset_password(data['new_password'])
         response = jsonify({
@@ -92,6 +94,7 @@ def reset_password():
                             'message':'Password successfully reset'
                            })
         response.status_code = 200
+        return response
     response = jsonify({'message': 'User Invalid'})
     response.status_code = 300
     return response
@@ -121,7 +124,7 @@ def register_business():
     return response
 
 
-@bp.route('businesses/<businessId>', methods=['PUT'])
+@bp.route('businesses/<int:businessId>', methods=['PUT'])
 def update_business_profile(businessId, **kwargs):
     business = Business.get_business(businessId)
     data = request.get_json()
@@ -144,9 +147,9 @@ def update_business_profile(businessId, **kwargs):
 def delete_business(businessId, **kwargs):
     business = Business.get_business(businessId)
     if business is not None:
-        Business.businesses.remove(business)
+        Business.delete_business(businessId)
         response = jsonify({
-                            'business':business.__repr__(),
+                            'business': business.__repr__(),
                             'status':'Successfully deleted'
                             })
         response.status_code = 200

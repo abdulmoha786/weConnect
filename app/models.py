@@ -75,11 +75,11 @@ class User (object):
 class Business (object):
     businesses = []
 
-    def __init__(self, business_id, owner, name, location, profile):
+    def __init__(self, business_id, owner_email, name, location, profile):
         self.id = business_id
         self.name = name
         self.location = location
-        self.owner = owner
+        self.owner = User.get_user_by_email(owner_email,User.user_list)
         self.profile = profile
         self.reviews = []
 
@@ -119,10 +119,10 @@ class Business (object):
         return business
 
     def __repr__(self):
-        return {'id':self.id,
+        return {'business_id':self.id,
                 'name':self.name,
                 'location':self.location,
-                'owner':self.owner,
+                'owner_email':self.owner.email,
                 'profile':self.profile
                 }
 

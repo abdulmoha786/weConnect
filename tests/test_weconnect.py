@@ -67,29 +67,58 @@ class WeconnectTestCase (unittest.TestCase):
 
     def test_reset_password(self):
         """"""
-        pass
+        user_data = self.user.__repr__()
+        user_data['password'] = "mypassword"
+        new_password = "mynewpassword"
+
+        data = {
+                'email':self.user.email,
+                'new_password':new_password,
+                'new_password_confirm':new_password
+                }
+        res = self.client.post('/api/v1/auth/reset-password', data=json.dumps(data),
+                               headers={'content-type': 'application/json'})
+        self.assertEqual(res.status_code, 200)
 
     def test_register_business(self):
         """"""
-        data = {
-                'business_id':self.business.id,
-                'owner_email': self.user.email,
-                'name': self.business.name,
-                'location':self.business.location,
-                'profile':self.business.profile
-                }
-        res = self.client.post('/api/v1/businesses', data=json.dumps(data),
+        business_data = self.business.__repr__()
+        res = self.client.post('/api/v1/businesses', data=json.dumps(business_data),
                                 headers={'content-type': 'application/json'})
         self.assertEqual(res.status_code, 201)
-        pass
 
     def test_update_business_profile(self):
         """"""
-        pass
+        data = {
+                'new_profile':'Here is my business new profile'
+                }
+
+        #Response for an existing business
+        res = self.client.put('/api/v1/businesses/1', data=json.dumps(data),
+                              headers={'content-type': 'application/json'})
+
+        #Response for an inexistent business
+        res2 = self.client.put('/api/v1/businesses/3', data=json.dumps(data),
+                              headers={'content-type': 'application/json'})
+        self.assertEqual(res.status_code, 201)
+        self.assertEqual(res2.status_code, 300)
 
     def test_delete_business(self):
         """"""
-        pass
+        #Register a business
+        business_data = self.business.__repr__ ()
+        self.client.post ('/api/v1/businesses', data=json.dumps (business_data),
+                                headers={'content-type': 'application/json'})
+
+        #Delete an existing business
+        res = self.client.delete('/api/v1/businesses/'+ str(business_data['business_id']),
+                               headers={'content-type': 'application/json'})
+        self.assertEqual(res.status_code, 200)
+
+        #Delete an inexistent business
+        res2 = self.client.delete ('/api/v1/businesses/' + str (business_data['business_id']),
+                                  headers={'content-type': 'application/json'})
+        self.assertEqual (res2.status_code, 300)
 
     def test_retrieve_business(self):
         """"""
