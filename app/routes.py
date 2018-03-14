@@ -105,7 +105,8 @@ def register_business():
     data = request.get_json()
     owner_email = data['owner_email']
     owner = User.get_user_by_email(owner_email, User.user_list)
-    if owner is not None:
+    business = Business.get_business(data['business_id'])
+    if owner is not None and business is None:
         business = Business(data['business_id'], data['owner_email'], data['name'], data['location'], data['profile'])
         Business.businesses.append(business)
         message = {
@@ -117,7 +118,7 @@ def register_business():
         return response
     message = {
         'business': data['business_id'],
-        'status': 'User Unknown'
+        'status': 'User Unknown or business exists'
     }
     response = jsonify(message)
     response.status_code = 500
@@ -161,15 +162,19 @@ def delete_business(businessId, **kwargs):
     return response
 
 
-@bp.route('all/businesses', methods=['GET'])
+@bp.route('businesses', methods=['GET'])
 def retrieve_businesses():
-    data = {}
-    business_no = 1
-    for business in Business.businesses:
-        data[business_no]=business.__repr__()
-        business_no += 1
-    response = jsonify(data)
-    response.status_code = 200
+    if len(Business.businesses) >= 1:
+        data = {}
+        business_no = 1
+        for business in Business.businesses:
+            data[business_no]=business.__repr__()
+            business_no += 1
+        response = jsonify(data)
+        response.status_code = 200
+        return response
+    response = jsonify({'message':'There are no registered businesses'})
+    response.status_code = 300
     return response
 
 
@@ -202,13 +207,13 @@ def add_review(businessId, **kwargs):
         return response
     response = jsonify({
                         'review':review.__repr__(),
-                        'status':'review cannot be added, User or bsiness invalid'
+                        'status':'review cannot be added, User or business invalid'
                         })
     response.status_code = 300
     return response
 
 
-@bp.route('businesses/<int:businessId>/all/reviews', methods=['GET'])
+@bp.route('businesses/<int:businessId>/reviews', methods=['GET'])
 def get_reviews(businessId, **kwargs):
     business = Business.get_business(businessId)
     data = {}
@@ -221,8 +226,8 @@ def get_reviews(businessId, **kwargs):
         response.status_code = 200
         return response
     res = {
-                'message':'No such business or review'
-                }
+            'message':'No such business or review'
+          }
     response = jsonify(res)
     response.status_code = 300
     return response

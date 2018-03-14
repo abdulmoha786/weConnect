@@ -79,7 +79,7 @@ class Business (object):
         self.id = business_id
         self.name = name
         self.location = location
-        self.owner = User.get_user_by_email(owner_email,User.user_list)
+        self.owner = owner_email
         self.profile = profile
         self.reviews = []
 
@@ -122,7 +122,7 @@ class Business (object):
         return {'business_id':self.id,
                 'name':self.name,
                 'location':self.location,
-                'owner_email':self.owner.email,
+                'owner_email':self.owner,
                 'profile':self.profile
                 }
 
