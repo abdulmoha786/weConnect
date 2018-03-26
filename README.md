@@ -4,6 +4,10 @@
 
 [![Build Status](https://travis-ci.org/Abu-Hisham/weConnect.svg?branch=master)](https://travis-ci.org/Abu-Hisham/weConnect)
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/eabc3cd0a972d33aaa86/maintainability)](https://codeclimate.com/github/Abu-Hisham/weConnect/maintainability)
+
+
+
 We connect is a platform that connects businesses and business men to enable them connect, register and each others businesses.
 
 # REQUIREMENTS

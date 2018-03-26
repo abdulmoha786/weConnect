@@ -28,7 +28,7 @@ def verify_password(username_or_token, password):
 
 @bp.route('auth/register', methods=['POST'])
 def create_user():
-    data = request.get_json ()
+    data = request.get_json()
     username = data['username']
     email = data['email']
     password = data['password']
