@@ -3,10 +3,6 @@ from config import Config
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 
-# @login.user_loader
-# def load_user(id):
-#     pass
-
 
 class User (object):
     user_list = []
@@ -15,13 +11,16 @@ class User (object):
         self.user_id = user_id
         self.username = username
         self.email = email
-        self.password_hash = generate_password_hash (password)
+        self.password_hash = generate_password_hash(password)
         self.login = False
-        self.__list = []
 
     def generate_auth_token(self, expiration=600):
         s = Serializer(Config.SECRET_KEY, expires_in=expiration)
         return s.dumps({'email': self.email})
+
+    def reset_password(self, new_password):
+        new_password_hash = generate_password_hash(new_password)
+        self.password_hash = new_password_hash
 
     @staticmethod
     def verify_auth_token(token, users):
@@ -38,8 +37,12 @@ class User (object):
     def __eq__(self, other):
         return self.email == other.email
 
-    def set_password(self, password):
-        pass
+    @staticmethod
+    def get_user(user_id):
+        for user in User.user_list:
+            if user.user_id == user_id:
+                return user
+        return None
 
     @staticmethod
     def get_user_by_email(email, users):
@@ -56,8 +59,14 @@ class User (object):
         if self.__index >= len(User.user_list) - 1:
             raise StopIteration
         self.__index += 1
-        user = User.users[self.__index]
+        user = User.user_list[self.__index]
         return user
+
+    def __repr__(self):
+        return {'user_id':self.user_id,
+                'username': self.username,
+                'email':self.email
+                }
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -66,11 +75,11 @@ class User (object):
 class Business (object):
     businesses = []
 
-    def __init__(self, business_id, owner, name, location, profile):
+    def __init__(self, business_id, owner_email, name, location, profile):
         self.id = business_id
         self.name = name
         self.location = location
-        self.owner = owner
+        self.owner = owner_email
         self.profile = profile
         self.reviews = []
 
@@ -79,6 +88,13 @@ class Business (object):
         for business in Business.businesses:
             if business.id == business_id:
                 Business.businesses.remove(business)
+
+    @staticmethod
+    def get_business(business_id):
+        for business in Business.businesses:
+            if business.id == business_id:
+                return business
+        return None
 
     def review_business(self, review):
         self.reviews.append(review)
@@ -91,9 +107,30 @@ class Business (object):
     def __eq__(self, other):
         return self.id == other.id
 
+    def __iter__(self):
+        self.__index = -1
+        return self
+
+    def __next__(self):
+        if self.__index >= len(Business.businesses) - 1:
+            raise StopIteration
+        self.__index += 1
+        business = Business.businesses[self.__index]
+        return business
+
+    def __repr__(self):
+        return {'business_id':self.id,
+                'name':self.name,
+                'location':self.location,
+                'owner_email':self.owner,
+                'profile':self.profile
+                }
+
 
 class Review (object):
-    def __init__(self, review_id, business_id, review_text, user_id):
+    reviews = []
+
+    def __init__(self, review_id, business_id,  user_id, review_text):
         self.review_id = review_id
         self.review_text = review_text
         self.business_id = business_id
@@ -111,3 +148,21 @@ class Review (object):
 
     def update_review(self, review_text):
         self.review_text = review_text
+
+    def __iter__(self):
+        self.__index = -1
+        return self
+
+    def __next__(self):
+        if self.__index >= len(Review.reviews) - 1:
+            raise StopIteration
+        self.__index += 1
+        review = Review.reviews[self.__index]
+        return review
+
+    def __repr__(self):
+        return {'review_id':self.review_id,
+                'review_text':self.review_text,
+                'business_id':self.business_id,
+                'user_id':self.user_id
+                }

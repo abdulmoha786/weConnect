@@ -1,9 +1,8 @@
 import unittest
-from flask import current_app, jsonify
+
 import json
 from app import app
 from app.models import User, Business, Review
-from config import TestingConfig
 
 
 class WeconnectTestCase (unittest.TestCase):
@@ -11,18 +10,12 @@ class WeconnectTestCase (unittest.TestCase):
 
     def setUp(self):
         """Define variables and initialize app."""
-        # testapp = app
-        # app.config.from_object(TestingConfig)
         self.client = app.test_client ()
         self.client.testing = True
         self.user = User (1, "Abdulaziz", "myemail.com", "mypassword")
         self.user2 = User(2, "Rajab", "rajab.com", "hispassword")
         self.business = Business(1,self.user.email, "my business", "Roysambu", "my business is good")
-        self.review = Review(1,1,"Your bisness is great", self.user2.email)
-
-    def test_app_creation(self):
-        """"""
-        pass
+        self.review = Review(1,1,1,"Your business is great")
 
     def test_user_generates_auth_token(self):
         users = [self.user]
@@ -33,15 +26,10 @@ class WeconnectTestCase (unittest.TestCase):
 
     def test_create_user(self):
         """"""
-        user_data = {'user_id': self.user.user_id,
-                     'username': self.user.username,
-                     'email': self.user.email,
-                     'password': self.user.password_hash}
-
+        user_data = self.user.__repr__()
+        user_data['password'] = 'mypassword'
         res = self.client.post('/api/v1/auth/register', data=json.dumps(user_data),
                                headers={'content-type': 'application/json'})
-        # user = User()
-        # self.users.append()
         self.assertEqual(res.status_code, 200)
         self.assertIn(self.user.username, str(res.data))
 
@@ -67,47 +55,124 @@ class WeconnectTestCase (unittest.TestCase):
 
     def test_reset_password(self):
         """"""
-        pass
+        user_data = self.user.__repr__()
+        user_data['password'] = "mypassword"
+        new_password = "mynewpassword"
+
+        data = {
+                'email':self.user.email,
+                'new_password':new_password,
+                'new_password_confirm':new_password
+                }
+        res = self.client.post('/api/v1/auth/reset-password', data=json.dumps(data),
+                               headers={'content-type': 'application/json'})
+        self.assertEqual(res.status_code, 200)
 
     def test_register_business(self):
         """"""
-        data = {
-                'business_id':self.business.id,
-                'owner_email': self.user.email,
-                'name': self.business.name,
-                'location':self.business.location,
-                'profile':self.business.profile
-                }
-        res = self.client.post('/api/v1/businesses', data=json.dumps(data),
+        #register a non-existent business
+        business_data = self.business.__repr__()
+        business_data['business_id'] = 3
+        res = self.client.post('/api/v1/businesses', data=json.dumps(business_data),
                                 headers={'content-type': 'application/json'})
         self.assertEqual(res.status_code, 201)
-        pass
+
+
+        #Register an existing business
+        res2 = self.client.post ('/api/v1/businesses', data=json.dumps(business_data),
+                                headers={'content-type': 'application/json'})
+        self.assertEqual(res2.status_code, 500)
 
     def test_update_business_profile(self):
         """"""
-        pass
+        data = {
+                'new_profile':'Here is my business new profile'
+                }
+
+        #Response for an existing business
+        res = self.client.put('/api/v1/businesses/1', data=json.dumps(data),
+                              headers={'content-type': 'application/json'})
+
+        #Response for an inexistent business
+        res2 = self.client.put('/api/v1/businesses/2', data=json.dumps(data),
+                              headers={'content-type': 'application/json'})
+        self.assertEqual(res.status_code, 201)
+        self.assertEqual(res2.status_code, 300)
 
     def test_delete_business(self):
         """"""
-        pass
+        #Register a business
+        business_data = self.business.__repr__()
+        self.client.post('/api/v1/businesses', data=json.dumps (business_data),
+                         headers={'content-type': 'application/json'})
+
+        #Delete an existing business
+        res = self.client.delete('/api/v1/businesses/' + str(business_data['business_id']),
+                               headers={'content-type': 'application/json'})
+        self.assertEqual(res.status_code, 200)
+
+        #Delete an inexistent business
+        res2 = self.client.delete('/api/v1/businesses/' + str(business_data['business_id'] + 1),
+                                  headers={'content-type': 'application/json'})
+        self.assertEqual(res2.status_code, 300)
 
     def test_retrieve_business(self):
         """"""
-        pass
+        #Retrieve businesses from a non-empty list
+        res2 = self.client.get('/api/v1/businesses',
+                               headers={'content-type': 'application/json'})
+        self.assertEqual(res2.status_code, 200)
 
     def test_get_a_business(self):
         """"""
-        pass
+        # Register a business
+        business_data = self.business.__repr__ ()
+        self.client.post ('/api/v1/businesses', data=json.dumps(business_data),
+                          headers={'content-type': 'application/json'})
+
+        #get the registered business
+        res = self.client.get ('/api/v1/businesses/' + str(business_data['business_id']),
+                          headers={'content-type': 'application/json'})
+        self.assertEqual(res.status_code, 201)
+
+        #Try to get an unregistered business
+        res2 = self.client.get ('/api/v1/businesses/' + str(business_data['business_id']+1),
+                                headers={'content-type': 'application/json'})
+        self.assertEqual(res2.status_code, 400)
 
     def test_add_review(self):
         """"""
+        review_data = self.review.__repr__()
 
+        #Add review to a non-existent business
+        res = self.client.post('/api/v1/businesses/' + str(review_data['business_id']+1) + '/reviews',
+                               data=json.dumps(review_data),
+                               headers = {'content-type': 'application/json'})
+        self.assertEqual(res.status_code, 300)
 
+        #register user
+        user_data = self.user.__repr__()
+        user_data['password'] = 'mypassword'
+        self.client.post ('/api/v1/auth/register', data=json.dumps (user_data),
+                                headers={'content-type': 'application/json'})
+
+        #Register a business
+        business_data = self.business.__repr__ ()
+        self.client.post ('/api/v1/businesses', data=json.dumps(business_data),
+                          headers={'content-type': 'application/json'})
+
+        #Add review to an existing business
+        res2 = self.client.post ('/api/v1/businesses/' + str(review_data['business_id']) + '/reviews',
+                                data=json.dumps(review_data),
+                                headers={'content-type': 'application/json'})
+        self.assertEqual(res2.status_code, 201)
+        pass
 
     def test_get_reviews(self):
         """"""
-        pass
-
+        res = self.client.get('/api/v1/businesses/' + str(self.business.id) + '/reviews',
+                                headers={'content-type': 'application/json'})
+        self.assertEqual(res.status_code, 200)
 
 if __name__ == "__main__":
     unittest.main()
